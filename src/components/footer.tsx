@@ -34,7 +34,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="https://twitter.com/nestmatch"
+                href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
@@ -43,7 +43,7 @@ export default function Footer() {
                 <Twitter className="h-4.5 w-4.5" />
               </a>
               <a
-                href="https://instagram.com/nestmatch"
+                href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
@@ -52,7 +52,7 @@ export default function Footer() {
                 <Instagram className="h-4.5 w-4.5" />
               </a>
               <a
-                href="https://linkedin.com/company/nestmatch"
+                href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
@@ -61,7 +61,7 @@ export default function Footer() {
                 <Linkedin className="h-4.5 w-4.5" />
               </a>
               <a
-                href="https://facebook.com/nestmatch"
+                href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"

@@ -5,6 +5,7 @@ import HowItWorks from "../components/how-it-works";
 import Categories from "../components/categories";
 import Stats from "../components/stats";
 import AIHighlight from "../components/ai-highlight";
+import Testimonials from "../components/testimonials";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
         <Categories />
         <Stats />
         <AIHighlight />
+        <Testimonials />
       </main>
     </>
   );

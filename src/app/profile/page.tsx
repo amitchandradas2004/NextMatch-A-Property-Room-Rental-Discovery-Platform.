@@ -92,6 +92,14 @@ export default function ProfilePage() {
     isPending,
   } = authClient.useSession();
   const user = session?.user;
+  const isDemoUser = user?.email === "demouser@nextmatch.com";
+
+  // New deletion states
+  const [listingToDelete, setListingToDelete] = useState<ListingItem | null>(null);
+  const [isDeletingListing, setIsDeletingListing] = useState(false);
+  const [bookmarkToRemove, setBookmarkToRemove] = useState<SavedItem | null>(null);
+  const [isRemovingBookmark, setIsRemovingBookmark] = useState(false);
+  const [isDemoRestrictionModalOpen, setIsDemoRestrictionModalOpen] = useState(false);
 
   // Route protection redirect
   useEffect(() => {
@@ -129,10 +137,16 @@ export default function ProfilePage() {
     }
   }, [session]);
 
-  const handleDeleteCreated = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this listing permanently? This cannot be undone.")) return;
+  const handleDeleteCreated = (listing: ListingItem) => {
+    setListingToDelete(listing);
+  };
+
+  const confirmDeleteCreated = async () => {
+    if (!listingToDelete) return;
+    const id = listingToDelete._id;
 
     try {
+      setIsDeletingListing(true);
       const res = await fetch(`/api/listings?id=${id}`, {
         method: "DELETE",
       });
@@ -141,18 +155,27 @@ export default function ProfilePage() {
       if (res.ok && data.success) {
         toast.success("Listing deleted successfully!");
         setCreatedListings((prev) => prev.filter((item) => item._id !== id));
+        setListingToDelete(null);
       } else {
         toast.error(data.message || "Failed to delete listing.");
       }
     } catch {
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsDeletingListing(false);
     }
   };
 
-  const handleRemoveSaved = async (savedId: string) => {
-    if (!confirm("Are you sure you want to remove this bookmark?")) return;
+  const handleRemoveSaved = (item: SavedItem) => {
+    setBookmarkToRemove(item);
+  };
+
+  const confirmRemoveSaved = async () => {
+    if (!bookmarkToRemove) return;
+    const savedId = bookmarkToRemove._id;
 
     try {
+      setIsRemovingBookmark(true);
       const res = await fetch(`/api/saved?id=${savedId}`, {
         method: "DELETE",
       });
@@ -161,11 +184,14 @@ export default function ProfilePage() {
       if (res.ok && data.success) {
         toast.success("Bookmark removed successfully!");
         setSavedListings((prev) => prev.filter((item) => item._id !== savedId));
+        setBookmarkToRemove(null);
       } else {
         toast.error(data.message || "Failed to remove bookmark.");
       }
     } catch {
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsRemovingBookmark(false);
     }
   };
 
@@ -208,6 +234,10 @@ export default function ProfilePage() {
 
   // Submit profile edits
   const onProfileSubmit = async (values: ProfileFormValues) => {
+    if (isDemoUser) {
+      toast.error("Profile editing is disabled for the demo user.");
+      return;
+    }
     try {
       const { error } = await authClient.updateUser({
         name: values.name,
@@ -228,6 +258,10 @@ export default function ProfilePage() {
 
   // Submit password updates
   const onPasswordSubmit = async (values: ChangePasswordValues) => {
+    if (isDemoUser) {
+      toast.error("Password change is disabled for the demo user.");
+      return;
+    }
     try {
       const { error } = await authClient.changePassword({
         currentPassword: values.currentPassword,
@@ -248,6 +282,10 @@ export default function ProfilePage() {
 
   // Submit account deletion
   const onDeleteConfirm = async () => {
+    if (isDemoUser) {
+      toast.error("Account deletion is disabled for the demo user.");
+      return;
+    }
     if (deleteConfirmText !== "DELETE") {
       toast.error("Please type DELETE to confirm account removal.");
       return;
@@ -345,7 +383,13 @@ export default function ProfilePage() {
         </div>
 
         <button
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => {
+            if (isDemoUser) {
+              setIsDemoRestrictionModalOpen(true);
+              return;
+            }
+            setIsEditing(!isEditing);
+          }}
           className={`px-4 py-2 text-sm font-bold rounded-xl border transition-all cursor-pointer ${
             isEditing
               ? "border-rose-500/50 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
@@ -498,7 +542,13 @@ export default function ProfilePage() {
 
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => setIsPasswordModalOpen(true)}
+                onClick={() => {
+                  if (isDemoUser) {
+                    setIsDemoRestrictionModalOpen(true);
+                    return;
+                  }
+                  setIsPasswordModalOpen(true);
+                }}
                 className="w-full py-3 bg-neutral-bg hover:bg-card-border text-foreground font-bold text-xs uppercase tracking-wider border border-card-border rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Key className="h-4 w-4 text-primary" />
@@ -514,7 +564,13 @@ export default function ProfilePage() {
               </button>
 
               <button
-                onClick={() => setIsDeleteModalOpen(true)}
+                onClick={() => {
+                  if (isDemoUser) {
+                    setIsDemoRestrictionModalOpen(true);
+                    return;
+                  }
+                  setIsDeleteModalOpen(true);
+                }}
                 className="w-full py-3 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 text-rose-600 dark:text-rose-450 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
@@ -585,7 +641,7 @@ export default function ProfilePage() {
                             <Eye className="h-4 w-4" />
                           </Link>
                           <button
-                            onClick={() => handleDeleteCreated(listing._id)}
+                            onClick={() => handleDeleteCreated(listing)}
                             className="p-2 rounded-xl border border-rose-500/10 hover:border-rose-500/35 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -658,7 +714,7 @@ export default function ProfilePage() {
                             <Eye className="h-4 w-4" />
                           </Link>
                           <button
-                            onClick={() => handleRemoveSaved(item._id)}
+                            onClick={() => handleRemoveSaved(item)}
                             className="p-2 rounded-xl border border-rose-500/10 hover:border-rose-500/35 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -832,6 +888,168 @@ export default function ProfilePage() {
                     Cancel
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DELETE LISTING CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {listingToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (!isDeletingListing) setListingToDelete(null);
+              }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-card-bg border border-card-border p-6 rounded-2xl shadow-xl space-y-5 text-foreground z-10 overflow-hidden"
+            >
+              <div className="flex items-start gap-3 text-rose-500">
+                <ShieldAlert className="h-6 w-6 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-extrabold tracking-tight">Delete Listing Permanently?</h3>
+                  <p className="text-xs text-rose-600/75 dark:text-rose-450/75 font-semibold mt-0.5">
+                    This will permanently delete the listing for <span className="font-extrabold">&ldquo;{listingToDelete.title}&rdquo;</span>. This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={confirmDeleteCreated}
+                  disabled={isDeletingListing}
+                  className="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isDeletingListing && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <span>Delete Listing</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListingToDelete(null)}
+                  disabled={isDeletingListing}
+                  className="flex-1 py-2.5 border border-card-border hover:bg-neutral-bg text-sm font-bold rounded-xl cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* REMOVE BOOKMARK CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {bookmarkToRemove && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (!isRemovingBookmark) setBookmarkToRemove(null);
+              }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-card-bg border border-card-border p-6 rounded-2xl shadow-xl space-y-5 text-foreground z-10 overflow-hidden"
+            >
+              <div className="flex items-start gap-3 text-amber-500">
+                <ShieldAlert className="h-6 w-6 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-extrabold tracking-tight">Remove Bookmark?</h3>
+                  <p className="text-xs text-muted font-bold mt-0.5">
+                    Are you sure you want to remove <span className="font-extrabold">&ldquo;{bookmarkToRemove.listing.title}&rdquo;</span> from your saved bookmarks list?
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={confirmRemoveSaved}
+                  disabled={isRemovingBookmark}
+                  className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isRemovingBookmark && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <span>Remove Bookmark</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBookmarkToRemove(null)}
+                  disabled={isRemovingBookmark}
+                  className="flex-1 py-2.5 border border-card-border hover:bg-neutral-bg text-sm font-bold rounded-xl cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DEMO ACCOUNT PROTECTION RESTRICTION MODAL */}
+      <AnimatePresence>
+        {isDemoRestrictionModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDemoRestrictionModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-card-bg border border-card-border p-6 rounded-2xl shadow-xl space-y-5 text-foreground z-10 overflow-hidden"
+            >
+              <div className="flex items-start gap-3 text-primary">
+                <ShieldAlert className="h-6 w-6 flex-shrink-0 mt-0.5 text-primary" />
+                <div>
+                  <h3 className="text-lg font-extrabold tracking-tight">Demo Account Protection</h3>
+                  <p className="text-xs text-muted font-bold mt-1.5 leading-relaxed">
+                    You are logged in under the shared public demo email <span className="text-foreground font-extrabold">demouser@nextmatch.com</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border border-card-border rounded-xl text-xs font-semibold leading-relaxed text-muted">
+                To protect this shared demo user account for other potential visitors, profile edits, credentials changes, and permanent account deletions are completely restricted. You can register your own personal email to try out these settings at any time!
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Link
+                  href="/register"
+                  onClick={() => setIsDemoRestrictionModalOpen(false)}
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs uppercase tracking-wider font-extrabold rounded-xl text-center shadow-md hover:-translate-y-0.5 transition-all cursor-pointer block"
+                >
+                  Create Account
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setIsDemoRestrictionModalOpen(false)}
+                  className="flex-1 py-2.5 border border-card-border hover:bg-neutral-bg text-xs uppercase tracking-wider font-extrabold rounded-xl cursor-pointer"
+                >
+                  Understood
+                </button>
               </div>
             </motion.div>
           </div>

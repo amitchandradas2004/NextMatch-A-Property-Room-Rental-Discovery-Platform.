@@ -129,10 +129,10 @@ export default function RegisterPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    const data = await authClient.signIn.social({
+    await authClient.signIn.social({
       provider: "google",
     });
-  }
+  };
   return (
     <div className="space-y-6">
       <div>

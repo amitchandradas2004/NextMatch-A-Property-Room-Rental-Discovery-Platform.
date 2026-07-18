@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
 import ScrollToTop from "../components/scroll-to-top";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,13 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-200">
         <ThemeProvider>
           {children}
+          <Toaster
+            position="top-center"
+            reverseOrder={false}
+            gutter={12}
+            toastOptions={{
+              duration: 4000,
+            }} />
           <ScrollToTop />
         </ThemeProvider>
       </body>

@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useTheme } from "./theme-provider";
 import { Sun, Moon, Menu, X, Home, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
@@ -22,7 +25,27 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  const router = useRouter();
+  const {
+    data: session,
+    isPending,
+  } = authClient.useSession();
+  const user = session?.user;
 
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Logged out successfully");
+            router.refresh();
+          }
+        }
+      });
+    } catch {
+      toast.error("Failed to log out");
+    }
+  };
   const navLinks = [
     { name: "Home", href: "/", icon: Home },
   ];
@@ -87,18 +110,39 @@ export default function Navbar() {
               </AnimatePresence>
             </button>
 
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-semibold hover:text-primary transition-colors cursor-pointer select-none"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 text-sm font-semibold bg-primary text-white hover:bg-primary-hover rounded-xl shadow-md shadow-primary/10 transition-all hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none cursor-pointer select-none"
-            >
-              Sign Up
-            </Link>
+            {isPending ? (
+              <div className="flex items-center gap-4 animate-pulse">
+                <div className="h-8 w-14 bg-card-border rounded-lg" />
+                <div className="h-10 w-28 bg-card-border rounded-xl" />
+              </div>
+            ) : user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-semibold text-muted max-w-[120px] truncate">
+                  Hi, {user.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 text-sm font-semibold bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all cursor-pointer select-none"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-semibold hover:text-primary transition-colors cursor-pointer select-none"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 text-sm font-semibold bg-primary text-white hover:bg-primary-hover rounded-xl shadow-md shadow-primary/10 transition-all hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none cursor-pointer select-none"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Hamburger / Toggle Mobile menu */}
@@ -150,20 +194,44 @@ export default function Navbar() {
               ))}
               <div className="h-px bg-card-border my-2" />
               <div className="flex flex-col gap-2 pt-2 px-3">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-sm font-bold hover:bg-card-border rounded-xl transition-all select-none"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-sm font-bold bg-primary text-white hover:bg-primary-hover rounded-xl shadow-md transition-all select-none"
-                >
-                  Sign Up
-                </Link>
+                {isPending ? (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-12 w-full bg-card-border rounded-xl" />
+                    <div className="h-12 w-full bg-card-border rounded-xl" />
+                  </div>
+                ) : user ? (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-muted text-center py-1">
+                      Logged in as {user.email}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full py-3 text-center text-sm font-bold bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all select-none cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full py-3 text-center text-sm font-bold hover:bg-card-border rounded-xl transition-all select-none"
+                    >
+                      Log In
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full py-3 text-center text-sm font-bold bg-primary text-white hover:bg-primary-hover rounded-xl shadow-md transition-all select-none"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

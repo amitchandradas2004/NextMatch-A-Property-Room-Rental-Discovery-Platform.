@@ -7,6 +7,7 @@ import Stats from "../components/stats";
 import AIHighlight from "../components/ai-highlight";
 import Testimonials from "../components/testimonials";
 import NewsletterFAQ from "../components/newsletter-faq";
+import Footer from "../components/footer";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         <Testimonials />
         <NewsletterFAQ />
       </main>
+      <Footer />
     </>
   );
 }

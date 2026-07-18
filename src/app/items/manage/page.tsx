@@ -7,10 +7,13 @@ import {
   Building,
   Plus,
   Trash2,
-  MapPin,
   Bed,
   Bath,
-  Maximize
+  Maximize,
+  Eye,
+  ShieldAlert,
+  Loader2,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authClient } from "../../../lib/auth-client";
@@ -38,6 +41,9 @@ export default function ManageListingsPage() {
   const { data: session, isPending } = authClient.useSession();
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [listingToDelete, setListingToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Route protection redirect
   useEffect(() => {
@@ -69,23 +75,33 @@ export default function ManageListingsPage() {
     }
   }, [session]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this listing permanently? This cannot be undone.")) return;
+  const openDeleteModal = (id: string) => {
+    setListingToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!listingToDelete) return;
 
     try {
-      const res = await fetch(`/api/listings?id=${id}`, {
+      setIsDeleting(true);
+      const res = await fetch(`/api/listings?id=${listingToDelete}`, {
         method: "DELETE",
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
         toast.success("Listing deleted successfully!");
-        setListings((prev) => prev.filter((item) => item._id !== id));
+        setListings((prev) => prev.filter((item) => item._id !== listingToDelete));
       } else {
         toast.error(data.message || "Failed to delete listing.");
       }
     } catch {
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setListingToDelete(null);
     }
   };
 
@@ -100,10 +116,13 @@ export default function ManageListingsPage() {
           </div>
           <div className="h-10 w-36 bg-card-border rounded-xl" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="h-96 bg-card-bg border border-card-border rounded-2xl animate-pulse" />
-          <div className="h-96 bg-card-bg border border-card-border rounded-2xl animate-pulse" />
-          <div className="h-96 bg-card-bg border border-card-border rounded-2xl animate-pulse" />
+        <div className="border border-card-border rounded-2xl overflow-hidden bg-card-bg">
+          <div className="h-12 bg-neutral-bg/60 border-b border-card-border" />
+          <div className="p-4 space-y-4">
+            <div className="h-8 bg-card-border rounded-xl" />
+            <div className="h-8 bg-card-border rounded-xl" />
+            <div className="h-8 bg-card-border rounded-xl" />
+          </div>
         </div>
       </div>
     );
@@ -128,13 +147,13 @@ export default function ManageListingsPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((n) => (
-            <div
-              key={n}
-              className="h-96 bg-card-bg/40 border border-card-border rounded-2xl animate-pulse"
-            />
-          ))}
+        <div className="border border-card-border rounded-2xl overflow-hidden bg-card-bg animate-pulse">
+          <div className="h-12 bg-neutral-bg/60 border-b border-card-border" />
+          <div className="p-4 space-y-4">
+            <div className="h-8 bg-card-border rounded-xl" />
+            <div className="h-8 bg-card-border rounded-xl" />
+            <div className="h-8 bg-card-border rounded-xl" />
+          </div>
         </div>
       ) : listings.length === 0 ? (
         <motion.div
@@ -160,105 +179,203 @@ export default function ManageListingsPage() {
           </Link>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {listings.map((listing) => (
-              <motion.div
-                key={listing._id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="group bg-card-bg border border-card-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full"
-              >
-                {/* Image Showcase */}
-                <div className="relative h-48 bg-slate-150 dark:bg-slate-900/80 overflow-hidden flex-shrink-0">
-                  {listing.images && listing.images[0]?.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={listing.images[0].url}
-                      alt={listing.title}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-350"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-muted bg-slate-100 dark:bg-slate-900/40">
-                      <Building className="h-10 w-10" />
-                    </div>
-                  )}
+        <div className="overflow-x-auto rounded-2xl border border-card-border bg-card-bg shadow-sm">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="border-b border-card-border bg-neutral-bg/50 text-[10px] font-bold text-muted uppercase tracking-wider select-none">
+                <th className="px-6 py-4">Preview</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4">Location</th>
+                <th className="px-6 py-4">Specifications</th>
+                <th className="px-6 py-4">Monthly Rent</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-card-border text-sm font-semibold text-foreground">
+              <AnimatePresence mode="popLayout">
+                {listings.map((listing) => (
+                  <motion.tr
+                    key={listing._id}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="hover:bg-neutral-bg/30 transition-colors animate-in fade-in duration-300"
+                  >
+                    {/* Preview Image */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-10 w-14 rounded-lg bg-slate-100 dark:bg-slate-900/60 overflow-hidden flex items-center justify-center border border-card-border flex-shrink-0">
+                        {listing.images && listing.images[0]?.url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={listing.images[0].url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Building className="h-4 w-4 text-slate-400" />
+                        )}
+                      </div>
+                    </td>
 
-                  {/* Property type badge */}
-                  <span className="absolute top-3 left-3 px-2.5 py-1 text-xxs font-extrabold bg-black/60 text-white backdrop-blur-sm rounded-lg uppercase tracking-wider">
-                    {listing.propertyType}
-                  </span>
+                    {/* Title */}
+                    <td className="px-6 py-4">
+                      <div className="max-w-[200px] truncate">
+                        <p className="font-extrabold text-foreground truncate">{listing.title}</p>
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-wider mt-0.5">
+                          {listing.propertyType} • {listing.furnished}
+                        </p>
+                      </div>
+                    </td>
 
-                  {/* Furnished Status Badge */}
-                  <span className="absolute top-3 right-3 px-2.5 py-1 text-xxs font-extrabold bg-primary text-white rounded-lg uppercase tracking-wider shadow-md shadow-primary/10">
-                    {listing.furnished}
-                  </span>
-                </div>
+                    {/* Location */}
+                    <td className="px-6 py-4">
+                      <div className="max-w-[180px] truncate text-xs font-bold text-muted">
+                        <p className="text-foreground font-semibold truncate">{listing.location.address}</p>
+                        <p className="truncate mt-0.5">{listing.location.city}</p>
+                      </div>
+                    </td>
 
-                {/* Listing Core Specs */}
-                <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
-                  <div className="space-y-2.5">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-extrabold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {listing.title}
-                      </h3>
-                    </div>
+                    {/* Specifications */}
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-bold text-muted">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <Bed className="h-3.5 w-3.5 text-primary" />
+                          <span>{listing.bedrooms} Beds</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Bath className="h-3.5 w-3.5 text-primary" />
+                          <span>{listing.bathrooms} Baths</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Maximize className="h-3.5 w-3.5 text-primary" />
+                          <span>{listing.sizeSqft} Sqft</span>
+                        </span>
+                      </div>
+                    </td>
 
-                    <p className="text-xs text-muted font-semibold line-clamp-2">
-                      {listing.shortDescription}
-                    </p>
-
-                    <div className="flex items-center gap-1.5 text-xs text-muted font-bold">
-                      <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="truncate">
-                        {listing.location.address}, {listing.location.city}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Specs row */}
-                  <div className="grid grid-cols-3 gap-2 py-3 border-y border-card-border text-center text-xs font-bold text-muted">
-                    <div className="flex flex-col items-center gap-1 border-r border-card-border">
-                      <Bed className="h-4 w-4 text-primary" />
-                      <span>{listing.bedrooms} Beds</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 border-r border-card-border">
-                      <Bath className="h-4 w-4 text-primary" />
-                      <span>{listing.bathrooms} Baths</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <Maximize className="h-4 w-4 text-primary" />
-                      <span>{listing.sizeSqft} Sqft</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
-                    <div>
-                      <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Monthly Rent</p>
-                      <p className="text-base font-black text-primary mt-0.5">
+                    {/* Price */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-black text-primary">
                         BDT {listing.price.toLocaleString()}
-                      </p>
-                    </div>
+                      </span>
+                    </td>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDelete(listing._id)}
-                        className="p-2.5 rounded-xl border border-rose-500/10 hover:border-rose-500/35 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        title="Delete listing"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                    {/* Actions */}
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/apartments/${listing._id}`}
+                          className="p-2 rounded-xl border border-card-border hover:border-primary/30 text-muted hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                          title="View Listing Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => openDeleteModal(listing._id)}
+                          className="p-2 rounded-xl border border-rose-500/10 hover:border-rose-500/35 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Delete Listing"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (!isDeleting) {
+                  setDeleteModalOpen(false);
+                  setListingToDelete(null);
+                }
+              }}
+              className="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-card-border bg-card-bg shadow-xl p-6 select-none"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setListingToDelete(null);
+                }}
+                className="absolute top-4 right-4 p-1.5 rounded-xl border border-card-border text-muted hover:text-foreground hover:bg-neutral-bg/40 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="flex flex-col items-center text-center space-y-4">
+                {/* Warning Badge Icon */}
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 dark:bg-rose-500/5 text-rose-500 animate-bounce duration-1000">
+                  <ShieldAlert className="h-6 w-6" />
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-extrabold text-foreground">
+                    Delete Listing Permanently?
+                  </h3>
+                  <p className="text-xs text-muted font-bold px-2">
+                    Are you sure you want to remove this property listing? This action cannot be undone and the post data will be deleted forever.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 w-full pt-2">
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={() => {
+                      setDeleteModalOpen(false);
+                      setListingToDelete(null);
+                    }}
+                    className="flex-1 py-2.5 px-4 rounded-xl border border-card-border text-xs font-extrabold text-foreground hover:bg-neutral-bg/40 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={confirmDelete}
+                    className="flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold bg-rose-500 text-white hover:bg-rose-600 shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <span>Delete permanently</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

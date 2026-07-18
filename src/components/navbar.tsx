@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "./theme-provider";
-import { Sun, Moon, Menu, X, Sparkles, ChevronDown, User, LogOut, Home, Building, PlusCircle, LayoutDashboard } from "lucide-react";
+import { Sun, Moon, Menu, X, Sparkles, ChevronDown, User, LogOut, Home, Building, PlusCircle, LayoutDashboard, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
@@ -89,6 +89,7 @@ export default function Navbar() {
       { name: "Apartments", href: "/apartments" },
       { name: "Add Listing", href: "/items/add" },
       { name: "Manage Listings", href: "/items/manage" },
+      { name: "Saved", href: "/saved" },
       { name: "Profile", href: "/profile" },
     ]
     : [
@@ -263,6 +264,14 @@ export default function Navbar() {
                         >
                           <User className="h-4 w-4 text-primary" />
                           <span>My Profile</span>
+                        </Link>
+                        <Link
+                          href="/saved"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2 text-sm font-semibold hover:bg-card-border hover:text-primary rounded-xl transition-colors"
+                        >
+                          <Bookmark className="h-4 w-4 text-muted" />
+                          <span>Saved Apartments</span>
                         </Link>
                         <div className="h-px bg-card-border my-1" />
                         <button

@@ -18,8 +18,10 @@ import {
   Loader2,
   ExternalLink,
   CheckCircle2,
-  FileCheck
+  FileCheck,
+  Bookmark
 } from "lucide-react";
+import { authClient } from "../../../lib/auth-client";
 import toast from "react-hot-toast";
 
 interface ListingItem {
@@ -63,6 +65,77 @@ export default function ApartmentDetailsPage() {
   const [listing, setListing] = useState<ListingItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    if (session && id) {
+      const checkSavedStatus = async () => {
+        try {
+          const res = await fetch("/api/saved");
+          const resData = await res.json();
+          if (res.ok && resData.success) {
+            const savedList = resData.data || [];
+            const alreadySaved = savedList.some(
+              (item: { listingId: string; listing?: { _id: string } }) =>
+                item.listingId === id || item.listing?._id === id
+            );
+            setIsSaved(alreadySaved);
+          }
+        } catch (err) {
+          console.error("Failed to verify bookmark status:", err);
+        }
+      };
+      checkSavedStatus();
+    }
+  }, [session, id]);
+
+  const handleSaveApartment = async () => {
+    if (!session) {
+      toast.error("Please log in to save apartments.");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      if (isSaved) {
+        // Unsave listing
+        const res = await fetch(`/api/saved?id=${id}`, {
+          method: "DELETE"
+        });
+        const resData = await res.json();
+        if (res.ok && resData.success) {
+          setIsSaved(false);
+          toast.success("Apartment unsaved successfully!");
+        } else {
+          toast.error(resData.message || "Failed to remove saved apartment.");
+        }
+      } else {
+        // Save listing
+        const res = await fetch("/api/saved", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ listingId: id })
+        });
+        const resData = await res.json();
+        if (res.ok && resData.success) {
+          setIsSaved(true);
+          toast.success("Apartment saved to bookmarks!");
+        } else {
+          toast.error(resData.message || "Failed to save apartment.");
+        }
+      }
+    } catch {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -329,6 +402,34 @@ export default function ApartmentDetailsPage() {
                 Security deposit requirements depend on owner terms.
               </p>
             </div>
+
+            {/* Book / Save Button */}
+            <button
+              onClick={handleSaveApartment}
+              disabled={saving}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-extrabold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                isSaved
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/10 hover:shadow-emerald-500/20"
+                  : "bg-primary hover:bg-primary-hover text-white shadow-primary/10 hover:shadow-primary/20"
+              }`}
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : isSaved ? (
+                <>
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Saved to Bookmarks</span>
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-3.5 w-3.5" />
+                  <span>Book / Save Apartment</span>
+                </>
+              )}
+            </button>
 
             {/* Spec grid */}
             <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold text-muted border-t border-card-border pt-4">

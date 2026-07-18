@@ -2,15 +2,14 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Search, MapPin, Home, ArrowDown, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowDown, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "./theme-provider";
 
 export default function Hero() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [location, setLocation] = useState("");
-  const [propertyType, setPropertyType] = useState("");
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -21,18 +20,6 @@ export default function Hero() {
   const imageSrc = mounted && theme === "dark"
     ? "/nextmatch_banner_dark.png"
     : "/nextmatch_banner_light.png";
-
-  const propertyTypes = [
-    { value: "apartment", label: "Apartments" },
-    { value: "studio", label: "Studios" },
-    { value: "house", label: "Houses" },
-    { value: "room", label: "Shared Rooms" },
-  ];
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Searching for ${propertyType || "properties"} in "${location || "all locations"}"`);
-  };
 
   const scrollToNext = () => {
     const nextSection = document.getElementById("featured");
@@ -109,80 +96,22 @@ export default function Hero() {
               options and summarize lease docs for you.
             </motion.p>
 
-            {/* Search Bar Widget */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="w-full max-w-2xl"
-            >
-              <form
-                onSubmit={handleSearch}
-                className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-card-bg/85 dark:bg-card-bg/60 border border-card-border backdrop-blur-md rounded-2xl sm:rounded-full shadow-xl"
-              >
-                <div className="flex items-center gap-3 px-4 py-2 w-full sm:flex-1 border-b sm:border-b-0 sm:border-r border-card-border">
-                  <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div className="flex-1 text-left">
-                    <label htmlFor="location" className="block text-[10px] font-bold text-muted uppercase tracking-wider">
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      id="location"
-                      placeholder="Where do you want to live?"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full bg-transparent border-0 p-0 text-foreground placeholder-muted focus:outline-none focus:ring-0 text-sm mt-0.5"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 px-4 py-2 w-full sm:flex-1 border-b sm:border-b-0 border-card-border">
-                  <Home className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div className="flex-1 text-left">
-                    <label htmlFor="property-type" className="block text-[10px] font-bold text-muted uppercase tracking-wider">
-                      Property Type
-                    </label>
-                    <select
-                      id="property-type"
-                      value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
-                      className="w-full bg-transparent border-0 p-0 text-foreground focus:outline-none focus:ring-0 text-sm mt-0.5 appearance-none cursor-pointer"
-                    >
-                      <option value="" className="text-muted dark:bg-card-bg">
-                        All Types
-                      </option>
-                      {propertyTypes.map((type) => (
-                        <option key={type.value} value={type.value} className="text-foreground dark:bg-card-bg">
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 w-full sm:w-auto p-1">
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto px-8 py-3 bg-primary hover:bg-primary-hover text-white font-medium rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/10"
-                  >
-                    <Search className="h-4 w-4" />
-                    <span>Search</span>
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-
             {/* Action Badges */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4"
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2"
             >
+              <Link
+                href="/apartments"
+                className="px-6 py-3 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-md shadow-primary/10 cursor-pointer"
+              >
+                Browse Apartments
+              </Link>
               <a
                 href="#ai-features"
-                className="group inline-flex items-center gap-2 px-6 py-3 border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary font-semibold rounded-xl transition-all active:scale-98"
+                className="group inline-flex items-center gap-2 px-6 py-3 border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary font-semibold rounded-xl transition-all active:scale-98 cursor-pointer"
               >
                 <Sparkles className="h-4 w-4 text-accent animate-pulse" />
                 <span>Let AI Find Your Match</span>

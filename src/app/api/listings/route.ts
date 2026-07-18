@@ -64,10 +64,19 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
+    const id = searchParams.get("id");
 
     const client = await getMongoClient();
     const db = client.db(dbName);
     const listingsCollection = db.collection("listings");
+
+    if (id) {
+      const listing = await listingsCollection.findOne({ _id: new ObjectId(id) });
+      if (!listing) {
+        return NextResponse.json({ success: false, message: "Listing not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: listing });
+    }
 
     let query = {};
     if (email) {

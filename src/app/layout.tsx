@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
 import ScrollToTop from "../components/scroll-to-top";
 import { Toaster } from "react-hot-toast";
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +54,11 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-200">
         <ThemeProvider>
-          {children}
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
           <Toaster
             position="top-center"
             reverseOrder={false}

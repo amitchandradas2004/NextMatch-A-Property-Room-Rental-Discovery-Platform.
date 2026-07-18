@@ -105,7 +105,7 @@ export default function RegisterPage() {
           Create your account
         </h1>
         <p className="text-sm text-muted mt-1.5 leading-relaxed">
-          Join NestMatch and find your perfect place
+          Join NextMatch and find your perfect place
         </p>
       </div>
 

@@ -26,7 +26,7 @@ export default function Footer() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                NestMatch
+                NextMatch
               </span>
             </a>
             <p className="text-sm text-muted leading-relaxed max-w-sm">
@@ -38,7 +38,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
-                aria-label="Follow NestMatch on Twitter"
+                aria-label="Follow NextMatch on Twitter"
               >
                 <Twitter className="h-4.5 w-4.5" />
               </a>
@@ -47,7 +47,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
-                aria-label="Follow NestMatch on Instagram"
+                aria-label="Follow NextMatch on Instagram"
               >
                 <Instagram className="h-4.5 w-4.5" />
               </a>
@@ -56,7 +56,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
-                aria-label="Follow NestMatch on LinkedIn"
+                aria-label="Follow NextMatch on LinkedIn"
               >
                 <Linkedin className="h-4.5 w-4.5" />
               </a>
@@ -65,7 +65,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-xl border border-card-border hover:border-primary/45 hover:text-primary transition-all text-muted"
-                aria-label="Follow NestMatch on Facebook"
+                aria-label="Follow NextMatch on Facebook"
               >
                 <Facebook className="h-4.5 w-4.5" />
               </a>
@@ -163,11 +163,11 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-muted">
               <li className="flex items-start gap-2.5">
                 <Mail className="h-4.5 w-4.5 text-primary flex-shrink-0 mt-0.5" />
-                <span>support@nestmatch.com</span>
+                <span>support@nextmatch.com</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Phone className="h-4.5 w-4.5 text-primary flex-shrink-0 mt-0.5" />
-                <span>+1 (800) 555-NEST</span>
+                <span>+1 (800) 555-NEXT</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4.5 w-4.5 text-primary flex-shrink-0 mt-0.5" />
@@ -180,7 +180,7 @@ export default function Footer() {
         <div className="h-px bg-card-border mb-8" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted font-medium">
-          <span>&copy; {currentYear} NestMatch Technologies Inc. All rights reserved.</span>
+          <span>&copy; {currentYear} NextMatch Technologies Inc. All rights reserved.</span>
           <div className="flex gap-4">
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
             <a href="/terms" className="hover:text-primary transition-colors">Terms</a>

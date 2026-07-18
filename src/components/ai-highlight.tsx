@@ -15,7 +15,7 @@ export default function AIHighlight() {
         <div className="text-center max-w-xl mx-auto mb-16">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-accent text-xs font-semibold uppercase tracking-wider mb-4 border border-white/5">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>NestMatch Intelligence</span>
+            <span>NextMatch Intelligence</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">AI Agents Built For Renters</h2>
           <p className="text-slate-350 mt-4 text-base leading-relaxed">

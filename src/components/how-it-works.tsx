@@ -42,7 +42,7 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Title */}
         <div className="text-center max-w-xl mx-auto mb-16">
-          <h2 className="text-3xl font-extrabold tracking-tight">How NestMatch Works</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">How NextMatch Works</h2>
           <p className="text-muted mt-3 text-base">
             Rent smarter, faster, and with absolute confidence. Our 3-step streamlined workflow does all the heavy lifting.
           </p>

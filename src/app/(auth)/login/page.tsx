@@ -25,7 +25,7 @@ const authApi = {
   login: async (values: LoginFormValues): Promise<{ success: boolean; message: string }> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (values.email === "demo@nestmatch.com" && values.password === "demo1234") {
+        if (values.email === "demo@nextmatch.com" && values.password === "demo1234") {
           resolve({ success: true, message: "Login successful!" });
         } else {
           resolve({ success: false, message: "Invalid email or password. Try the demo account!" });
@@ -67,7 +67,7 @@ export default function LoginPage() {
   };
 
   const handleDemoFill = () => {
-    setValue("email", "demo@nestmatch.com", { shouldValidate: true });
+    setValue("email", "demo@nextmatch.com", { shouldValidate: true });
     setValue("password", "demo1234", { shouldValidate: true });
     setIsDemoToastOpen(true);
     setApiError(null);

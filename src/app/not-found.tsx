@@ -39,7 +39,7 @@ export default function NotFound() {
               <Sparkles className="h-6 w-6" />
             </div>
             <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              NestMatch
+              NextMatch
             </span>
           </Link>
         </div>

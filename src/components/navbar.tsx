@@ -43,7 +43,7 @@ export default function Navbar() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                NestMatch
+                NextMatch
               </span>
             </Link>
           </div>

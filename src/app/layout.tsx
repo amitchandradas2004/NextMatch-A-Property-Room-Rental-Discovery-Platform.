@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
+import ScrollToTop from "../components/scroll-to-top";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NestMatch - AI-Powered Property & Room Discoveries",
+  title: "NextMatch - AI-Powered Property & Room Discoveries",
   description:
-    "Find your perfect home, studio, or shared room with NestMatch. Utilize our AI Smart Recommendation Engine and AI Lease Document Summarizer for seamless renting.",
+    "Find your perfect home, studio, or shared room with NextMatch. Utilize our AI Smart Recommendation Engine and AI Lease Document Summarizer for seamless renting.",
 };
 
 export default function RootLayout({
@@ -50,9 +51,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-200">
         <ThemeProvider>
-
           {children}
-
+          <ScrollToTop />
         </ThemeProvider>
       </body>
     </html>

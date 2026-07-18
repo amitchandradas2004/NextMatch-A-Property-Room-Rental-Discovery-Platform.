@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
     name: "Sarah Jenkins",
     role: "Product Designer",
     initials: "SJ",
-    quote: "NestMatch's AI engine found me a quiet studio in Seattle with high-speed fiber and an active tech vibe. It understood my prompt exactly on the first try!",
+    quote: "NextMatch's AI engine found me a quiet studio in Seattle with high-speed fiber and an active tech vibe. It understood my prompt exactly on the first try!",
     rating: 5,
     avatarBg: "bg-blue-600",
   },
@@ -38,7 +38,7 @@ const testimonials: Testimonial[] = [
     name: "Elena Rostova",
     role: "Graduate Student",
     initials: "ER",
-    quote: "Relocating from Chicago to Austin was stressful until I tried NestMatch. The recommendation agent mapped safety ratings and commute lines for me.",
+    quote: "Relocating from Chicago to Austin was stressful until I tried NextMatch. The recommendation agent mapped safety ratings and commute lines for me.",
     rating: 5,
     avatarBg: "bg-teal-600",
   },
@@ -79,7 +79,7 @@ export default function Testimonials() {
         <div className="mb-12">
           <h2 className="text-3xl font-extrabold tracking-tight">What Our Renters Say</h2>
           <p className="text-muted mt-2 text-base">
-            Discover how real tenants use NestMatch to find homes and protect themselves from bad leases.
+            Discover how real tenants use NextMatch to find homes and protect themselves from bad leases.
           </p>
         </div>
 

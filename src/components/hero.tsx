@@ -19,8 +19,8 @@ export default function Hero() {
   }, []);
 
   const imageSrc = mounted && theme === "dark"
-    ? "/nestmatch_banner_dark.png"
-    : "/nestmatch_banner_light.png";
+    ? "/nextmatch_banner_dark.png"
+    : "/nextmatch_banner_light.png";
 
   const propertyTypes = [
     { value: "apartment", label: "Apartments" },

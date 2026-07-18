@@ -16,7 +16,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Is the AI Lease Summarizer safe and secure?",
-    answer: "Yes, security is our top priority. All lease agreements uploaded to NestMatch are encrypted, processed in sandbox memory, and redacted of sensitive identifiers. We never sell your lease data or use it for marketing.",
+    answer: "Yes, security is our top priority. All lease agreements uploaded to NextMatch are encrypted, processed in sandbox memory, and redacted of sensitive identifiers. We never sell your lease data or use it for marketing.",
   },
   {
     question: "Is listing and applying for rooms free?",

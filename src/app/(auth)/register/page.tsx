@@ -81,7 +81,7 @@ export default function RegisterPage() {
     setApiSuccess(null);
     try {
       // console.log(values);
-      const { data, error } = await authClient.signUp.email({
+      const { error } = await authClient.signUp.email({
         name: values.name,
         email: values.email,
         password: values.password,

@@ -11,6 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import AuthInput from "../../../components/auth-input";
 import PasswordInput from "../../../components/password-input";
 import GoogleButton from "../../../components/google-button";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 // Schema validation using Zod
 const loginSchema = z.object({
@@ -20,26 +23,11 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Mock API endpoints to easily substitute a real backend later
-const authApi = {
-  login: async (values: LoginFormValues): Promise<{ success: boolean; message: string }> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (values.email === "demo@nextmatch.com" && values.password === "demo1234") {
-          resolve({ success: true, message: "Login successful!" });
-        } else {
-          resolve({ success: false, message: "Invalid email or password. Try the demo account!" });
-        }
-      }, 1500);
-    });
-  },
-};
+
 
 export default function LoginPage() {
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [isDemoToastOpen, setIsDemoToastOpen] = useState(false);
-
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -50,31 +38,52 @@ export default function LoginPage() {
     mode: "onBlur",
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
-    setApiError(null);
-    setApiSuccess(null);
-    try {
-      console.log(values);
-      const response = await authApi.login(values);
-      if (response.success) {
-        setApiSuccess(response.message);
-      } else {
-        setApiError(response.message);
-      }
-    } catch {
-      setApiError("A network error occurred. Please try again.");
-    }
-  };
-
   const handleDemoFill = () => {
-    setValue("email", "demo@nextmatch.com", { shouldValidate: true });
-    setValue("password", "demo1234", { shouldValidate: true });
+    setValue("email", "demouser@nextmatch.com", { shouldValidate: true });
+    setValue("password", "demouser@123", { shouldValidate: true });
     setIsDemoToastOpen(true);
     setApiError(null);
     setTimeout(() => {
       setIsDemoToastOpen(false);
     }, 2500);
   };
+
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const onSubmit = async (values: LoginFormValues) => {
+    setApiError(null);
+    setApiSuccess(null);
+    try {
+      const { error } = await authClient.signIn.email({
+        email: values.email,
+        password: values.password,
+        callbackURL: "/",
+      });
+
+
+
+      if (error) {
+        setApiError(error.message || "Invalid email or password.");
+        toast.error(error.message || "Invalid email or password.");
+        return;
+      }
+
+      setApiSuccess("Login successful!");
+      toast.success(
+        <div>
+          <h3 className="font-heading text-base font-bold text-slate-900">Welcome Back!</h3>
+          <p className="font-body mt-1 text-sm text-slate-600">
+            You have successfully signed in to <span className="font-semibold text-indigo-600">NestMatch</span>.
+          </p>
+        </div>
+      );
+      router.push("/");
+    } catch {
+      setApiError("Network error. Please try again.");
+    }
+  };
+
+
 
   return (
     <div className="space-y-6">
@@ -107,7 +116,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex items-start gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold"
+            className="flex items-start gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-450 text-xs font-semibold"
           >
             {" "}
             <CheckCircle2 className="h-4.5 w-4.5 flex-shrink-0 mt-0.5" />{" "}
@@ -138,27 +147,14 @@ export default function LoginPage() {
           disabled={isSubmitting}
           {...register("email")}
         />{" "}
-        <div className="relative">
-          {" "}
-          <PasswordInput
-            id="password"
-            label="Password"
-            placeholder="••••••••"
-            error={errors.password?.message}
-            disabled={isSubmitting}
-            {...register("password")}
-          />{" "}
-          <div className="absolute right-0 top-0">
-            {" "}
-            <Link
-              href="/forgot-password"
-              className="text-xs font-bold text-primary hover:underline hover:text-primary-hover transition-colors"
-            >
-              {" "}
-              Forgot password?{" "}
-            </Link>{" "}
-          </div>{" "}
-        </div>{" "}
+        <PasswordInput
+          id="password"
+          label="Password"
+          placeholder="••••••••"
+          error={errors.password?.message}
+          disabled={isSubmitting}
+          {...register("password")}
+        />{" "}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -184,7 +180,7 @@ export default function LoginPage() {
         {" "}
         <UserCheck className="h-4 w-4 text-primary" />{" "}
         <span>Try Demo Account</span>{" "}
-      </button>{" "}
+      </button>{" "}{" "}
       <div className="flex items-center gap-4 py-2">
         {" "}
         <div className="h-px bg-card-border flex-grow" />{" "}

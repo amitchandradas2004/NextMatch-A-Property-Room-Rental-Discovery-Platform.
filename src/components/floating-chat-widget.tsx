@@ -28,11 +28,21 @@ export default function FloatingChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [conversationId, setConversationId] = useState<string>("");
+  const [isMobile, setIsMobile] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLDivElement>(null);
 
   const dragControls = useDragControls();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     const target = e.target as HTMLElement;
@@ -180,11 +190,13 @@ export default function FloatingChatWidget() {
     <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-50 select-none">
       {/* 1. FLOATING ACTION BUTTON */}
       <motion.div
-        drag
+        drag={!isMobile}
         dragConstraints={constraintsRef}
         dragElastic={0.1}
         dragMomentum={false}
-        className="absolute bottom-6 right-6 pointer-events-auto cursor-grab active:cursor-grabbing"
+        className={`absolute bottom-6 right-6 pointer-events-auto ${
+          isMobile ? "" : "cursor-grab active:cursor-grabbing"
+        }`}
       >
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -200,7 +212,7 @@ export default function FloatingChatWidget() {
       {/* 2. CHAT PANEL */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 sm:absolute sm:inset-auto sm:bottom-24 sm:right-6 w-full sm:w-[380px] h-full sm:h-[550px] flex flex-col pointer-events-none select-none">
+          <div className="fixed bottom-0 right-0 sm:absolute sm:bottom-24 sm:right-6 w-full sm:w-[380px] h-dvh sm:h-[500px] sm:max-h-[calc(100vh-120px)] flex flex-col pointer-events-none select-none">
             {/* Mobile Backdrop overlay */}
             <div
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm sm:hidden pointer-events-auto"
@@ -208,21 +220,25 @@ export default function FloatingChatWidget() {
             />
 
             <motion.div
-              drag
+              drag={!isMobile}
               dragControls={dragControls}
               dragListener={false}
               dragConstraints={constraintsRef}
               dragElastic={0.1}
               dragMomentum={false}
-              onPointerDown={handlePointerDown}
+              onPointerDown={isMobile ? undefined : handlePointerDown}
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
               transition={{ type: "spring", duration: 0.35 }}
-              className="relative w-full h-full bg-card-bg border border-card-border sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto cursor-grab active:cursor-grabbing"
+              className={`relative w-full h-full bg-card-bg border border-card-border border-t-4 border-t-primary sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto ${
+                isMobile ? "" : "cursor-grab active:cursor-grabbing"
+              }`}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-card-border bg-neutral-bg/60 select-none cursor-grab active:cursor-grabbing">
+              <div className={`flex items-center justify-between px-4 py-3.5 border-b border-card-border bg-neutral-bg/60 select-none ${
+                isMobile ? "" : "cursor-grab active:cursor-grabbing"
+              }`}>
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <Bot className="h-4.5 w-4.5" />

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Building,
   Search,
@@ -37,13 +38,20 @@ interface ListingItem {
   createdAt?: string;
 }
 
-export default function ApartmentsPage() {
+function ApartmentsContent() {
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type") || "all";
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedType, setSelectedType] = useState(typeParam);
+
+  useEffect(() => {
+    setSelectedType(typeParam);
+  }, [typeParam]);
   const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState("newest");
 
@@ -484,5 +492,17 @@ export default function ApartmentsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ApartmentsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-bg flex items-center justify-center">
+        <p className="text-sm font-extrabold text-muted animate-pulse">Loading apartments...</p>
+      </div>
+    }>
+      <ApartmentsContent />
+    </Suspense>
   );
 }

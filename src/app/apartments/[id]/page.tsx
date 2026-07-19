@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { authClient } from "../../../lib/auth-client";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ListingItem {
   _id: string;
@@ -263,12 +264,18 @@ export default function ApartmentDetailsPage() {
             {/* Main Showcase Image */}
             <div className="relative h-96 sm:h-[450px] bg-slate-150 dark:bg-slate-900/80 overflow-hidden flex items-center justify-center">
               {hasImages ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={listing.images[activeImageIndex].url}
-                  alt={listing.title}
-                  className="h-full w-full object-cover"
-                />
+                <AnimatePresence mode="popLayout">
+                  <motion.img
+                    key={activeImageIndex}
+                    src={listing.images[activeImageIndex].url}
+                    alt={listing.title}
+                    initial={{ opacity: 0, scale: 1.03 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </AnimatePresence>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-muted">
                   <Building className="h-12 w-12" />
@@ -286,7 +293,7 @@ export default function ApartmentDetailsPage() {
                         prev === 0 ? listing.images.length - 1 : prev - 1
                       )
                     }
-                    className="absolute left-4 p-2 rounded-xl bg-black/60 hover:bg-black text-white hover:scale-105 transition-all cursor-pointer"
+                    className="absolute left-4 p-2 rounded-xl bg-black/60 hover:bg-black text-white hover:scale-105 transition-all cursor-pointer z-10"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -297,7 +304,7 @@ export default function ApartmentDetailsPage() {
                         prev === listing.images.length - 1 ? 0 : prev + 1
                       )
                     }
-                    className="absolute right-4 p-2 rounded-xl bg-black/60 hover:bg-black text-white hover:scale-105 transition-all cursor-pointer"
+                    className="absolute right-4 p-2 rounded-xl bg-black/60 hover:bg-black text-white hover:scale-105 transition-all cursor-pointer z-10"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>

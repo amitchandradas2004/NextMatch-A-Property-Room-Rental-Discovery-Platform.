@@ -1,5 +1,6 @@
 import Hero from "../components/hero";
 import FeaturedListings from "../components/featured-listings";
+import PlatformGrowth from "../components/platform-growth";
 import HowItWorks from "../components/how-it-works";
 import Categories from "../components/categories";
 import Stats from "../components/stats";
@@ -12,6 +13,7 @@ export default function Home() {
     <>
       <Hero />
       <FeaturedListings />
+      <PlatformGrowth />
       <HowItWorks />
       <Categories />
       <Stats />
